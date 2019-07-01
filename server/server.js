@@ -53,11 +53,11 @@ app.delete('/todos/:id', (req, res) => {
         return res.status(404).send();
     }
 
-    Todo.findByIdAndRemove('5d19dc8ce678a31a908fdd7a').then((todo) => {
+    Todo.findByIdAndRemove(id).then((todo) => {
         if(!todo) {
             return res.status(404).send();
         }
-        res.send(todo);
+        res.send({todo});
     }).catch(e => res.status(400).send());
 });
 
