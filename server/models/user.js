@@ -51,7 +51,7 @@ UserSchema.methods.toJSON = function() {
     return _.pick(userObj, ['_id', 'email']);
 }
 
-UserSchema.methods.generateAuthToken = function() {
+UserSchema.methods.generateAuthToken = async function() {
     // Get the reference of the current user
     var user = this;
 
@@ -69,9 +69,12 @@ UserSchema.methods.generateAuthToken = function() {
     // user.tokens = user.tokens.concat([{access, token}]);
 
     // Save user to database and return the token to user
-    return user.save().then(() => {
-        return token;
-    });
+    // return user.save().then(() => {
+    //     return token;
+    // });
+
+    await user.save();
+    return token;
 
 }
 
@@ -91,13 +94,53 @@ UserSchema.statics.findByToken = function(token) {
     });
 }
 
+UserSchema.statics.findByCredentials = function(email, password) {
+    User = this;
+
+    return User.findOne({email}).then((user) => {
+        if(!user) {
+            console.log('User does not exist');
+            return Promise.reject();
+        }
+        // return bcrypt.compare(password, user.password).then((res) => {
+        //     if(true) {
+        //         resolve(user);
+        //     } else {
+        //         console.log('typeof plain password: ', typeof password);
+        //         console.log('typeof hashed password: ', typeof user.password);
+        //         console.log('plain pasword:', password);
+        //         console.log('hashed password: ', user.password);
+        //         console.log('Incorrect password!');
+        //         console.log('matches: ', res);
+        //         reject();
+        //     }
+        // });
+        return new Promise((resolve, reject) => {
+            bcrypt.compare(password, user.password, (err, res) => {
+                if(res) {
+                    resolve(user);
+                } else {
+                    console.log('typeof plain password: ', typeof password);
+                    console.log('typeof hashed password: ', typeof user.password);
+                    console.log('plain pasword:', password);
+                    console.log('hashed password: ', user.password);
+                    console.log('Incorrect password!');
+                    console.log(res);
+                    reject();
+                }
+            });
+        });
+    });
+}
+
 UserSchema.pre('save', function(next) {
     var user = this;
 
-    if(user.isModified()) {
+    if(user.isModified('password')) {
         bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(user.password, salt, (err, hash) => {
                 user.password = hash;
+                console.log('Hashed password to go in DB: ', user.password);
                 next();
             });
         });
