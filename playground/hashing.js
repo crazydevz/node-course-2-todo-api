@@ -31,7 +31,6 @@ bcrypt.compare(password, hashedPassword, (err, res) => {
 // var hash = SHA256(text).toString();
 // console.log(hash);
 
-
 // Real life example for understanding
 // var data = {
 //     id: 4

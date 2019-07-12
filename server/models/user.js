@@ -120,12 +120,6 @@ UserSchema.statics.findByCredentials = function(email, password) {
                 if(res) {
                     resolve(user);
                 } else {
-                    console.log('typeof plain password: ', typeof password);
-                    console.log('typeof hashed password: ', typeof user.password);
-                    console.log('plain pasword:', password);
-                    console.log('hashed password: ', user.password);
-                    console.log('Incorrect password!');
-                    console.log(res);
                     reject();
                 }
             });
@@ -140,7 +134,6 @@ UserSchema.pre('save', function(next) {
         bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(user.password, salt, (err, hash) => {
                 user.password = hash;
-                console.log('Hashed password to go in DB: ', user.password);
                 next();
             });
         });
